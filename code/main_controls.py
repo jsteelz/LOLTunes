@@ -38,7 +38,3 @@ def addMusic(rootdir):
     for subdir, dirs, files in os.walk(rootdir):
         for file in files:
             dbt.addFile(os.path.join(subdir, file))
-
-# Controls the info button
-def info():
-    print('Not Implemented')
