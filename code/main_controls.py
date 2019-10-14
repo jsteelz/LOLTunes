@@ -18,7 +18,7 @@ def prev():
     print('Not Implemented')
 
 # Controls the show queue button
-def showQueue():
+def queue():
     print('Not Implemented')
 
 # Controls the clear queue button

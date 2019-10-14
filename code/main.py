@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+from PIL import Image, ImageTk
 import main_controls as mc
 
 class Settings(tk.Frame):
@@ -12,77 +13,110 @@ class AddMusic(tk.Frame):
     pass
 
 # Defines view for the play menu section of the app
-class PlayMenu(tk.Frame):
+class PlayMenu():
     # Changes the pause/play icon
     def pausePlay(self):
         if self.play:
-            self.pp['text'] = "PL"
+            # self.pp['text'] = "PL"
             self.play = False
         else:
-            self.pp['text'] = "PA"
+            # self.pp['text'] = "PA"
             self.play = True
 
     def __init__(self, root):
         # Music is by definition playing on init
         self.play = True
 
+        # Create frame for play menu
+        self.frame = ttk.Frame(root.mainframe, style="TFrame")
+        self.frame.grid(column=0, row=0, sticky = "W")
+
         # First row
-        self.artist = ttk.Label(root.mainframe, text=root.songQueue[0][0],\
+        self.artist = ttk.Label(self.frame, text=root.songQueue[0][0],\
         style="TLabel")
         self.artist.grid(row=0, columnspan=8, sticky="W")
-        self.pp = ttk.Label(root.mainframe, text="PA", style="TLabel")
+
+        pauseIcon = ImageTk.PhotoImage(Image.open("../img/pause.png"))
+        self.pp = ttk.Label(self.frame, image=pauseIcon, style="TLabel")
         self.pp.grid(row=0, column=8)
-        ttk.Label(root.mainframe, text="F", style="TLabel")\
+        self.pp.image = pauseIcon
+
+        ttk.Label(self.frame, text="F", style="TLabel")\
         .grid(row=0, column=9)
-        ttk.Label(root.mainframe, text="B", style="TLabel")\
+
+        ttk.Label(self.frame, text="B", style="TLabel")\
         .grid(row=0, column=10)
 
         # Second row
-        ttk.Label(root.mainframe, text=root.songQueue[0][1], style="TLabel")\
+        ttk.Label(self.frame, text=root.songQueue[0][1], style="TLabel")\
         .grid(row=1, columnspan=4, sticky="W")
-        ttk.Label(root.mainframe, text=root.songQueue[0][2], style="TLabel")\
+
+        ttk.Label(self.frame, text=root.songQueue[0][2], style="TLabel")\
         .grid(row=1, column=4, columnspan=4, sticky="W")
-        ttk.Label(root.mainframe, text="Q", style="TLabel")\
-        .grid(row=1, column=8)
-        ttk.Label(root.mainframe, text="C", style="TLabel")\
-        .grid(row=1, column=9)
-        self.stop = ttk.Label(root.mainframe, text="S", style="TLabel")
+
+        queueIcon = ImageTk.PhotoImage(Image.open("../img/queue.png"))
+        self.queue = ttk.Label(self.frame, image=queueIcon, style="TLabel")
+        self.queue.grid(row=1, column=8)
+        self.queue.image = queueIcon
+
+        cQueueIcon = ImageTk.PhotoImage(Image.open("../img/clear_queue.png"))
+        self.cQueue = ttk.Label(self.frame, image=cQueueIcon, style="TLabel")
+        self.cQueue.grid(row=1, column=9)
+        self.cQueue.image = cQueueIcon
+
+        stopIcon = ImageTk.PhotoImage(Image.open("../img/stop.png"))
+        self.stop = ttk.Label(self.frame, image=stopIcon, style="TLabel")
         self.stop.grid(row=1, column=10)
+        self.stop.image = stopIcon
 
         # Last adjustments before display
-        for x in range(3):
-            root.mainframe.grid_rowconfigure(x, minsize=30)
-        for child in root.mainframe.winfo_children():
-            child.grid_configure(padx=5, pady=5)
+        for child in self.frame.winfo_children():
+            child.grid_configure(padx=5, pady=2.5)
+        for x in range(2):
+            self.frame.grid_rowconfigure(x, minsize=30)
+        for x in range(8):
+            self.frame.grid_columnconfigure(x, minsize=40)
+        for x in range(8, 11):
+            self.frame.grid_columnconfigure(x, minsize=30)
 
         # Attach event listeners to buttons
         self.pp.bind("<Button-1>", root.pausePlay)
         self.stop.bind("<Button-1>", root.stop)
 
 # Defines view for the search bar section of the app
-class SearchBar(tk.Frame):
+class SearchBar():
     def __init__(self, root):
-        ttk.Label(root.mainframe, text="DL", style="TLabel")\
-        .grid(row=2, column=8)
-        ttk.Label(root.mainframe, text="AM", style="TLabel")\
-        .grid(row=2, column=9)
-        ttk.Label(root.mainframe, text="?", style="TLabel")\
-        .grid(row=2, column=10)
-        self.searchBar = tk.Entry(root.mainframe, bg="#282C34", bd=0, \
+        # Create frame for search menu
+        self.frame = ttk.Frame(root.mainframe, style="TFrame")
+        self.frame.grid(column=0, row=1, sticky = "W")
+
+        # Add display elements
+        pauseIcon = ImageTk.PhotoImage(Image.open("../img/pause.png"))
+        self.delLib = ttk.Label(self.frame, image=pauseIcon, style="TLabel")
+        self.delLib.grid(row=0, column=8)
+        self.delLib.image = pauseIcon
+
+        ttk.Label(self.frame, text="AM", style="TLabel")\
+        .grid(row=0, column=9)
+
+        ttk.Label(self.frame, text="?", style="TLabel")\
+        .grid(row=0, column=10)
+
+        self.searchBar = tk.Entry(self.frame, bg="#282C34", bd=0, \
         fg='white', selectbackground="white", \
         selectborderwidth=0, selectforeground="#282C34", \
         insertbackground='white', highlightthickness=0, \
         textvariable=root.searchQuery)
         root.searchQuery.set("Search library...")
-        self.searchBar.grid(row=2, column=0, columnspan=9, sticky="W")
+        self.searchBar.grid(row=0, column=0, columnspan=9, sticky="W")
 
         # Last adjustments before display
-        for child in root.mainframe.winfo_children():
-            child.grid_configure(padx=5, pady=5)
+        for child in self.frame.winfo_children():
+            child.grid_configure(padx=5, pady=2.5)
         for x in range(8):
-            root.mainframe.grid_columnconfigure(x, minsize=40)
+            self.frame.grid_columnconfigure(x, minsize=40)
         for x in range(8, 11):
-            root.mainframe.grid_columnconfigure(x, minsize=25)
+            self.frame.grid_columnconfigure(x, minsize=30)
 
         # Attach the event listener to clear default text
         self.searchBar.bind("<Button-1>", root.clear_text)
