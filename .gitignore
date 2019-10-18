@@ -1,3 +1,5 @@
 *.db
 *.pyc
+*.lol
+icon-dev
 __pycache__

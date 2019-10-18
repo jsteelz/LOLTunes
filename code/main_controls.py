@@ -1,5 +1,5 @@
 import os
-import db_tools as dbt
+from db_interface import DB
 
 # Controls the search bar
 def search(query):
@@ -35,6 +35,8 @@ def deleteLibrary():
 
 # Controls the button to add music to the database
 def addMusic(rootdir):
+    db = DB()
     for subdir, dirs, files in os.walk(rootdir):
         for file in files:
-            dbt.addFile(os.path.join(subdir, file))
+            print(file)
+            db.addFile(os.path.join(subdir, file))

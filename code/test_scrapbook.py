@@ -7,11 +7,13 @@ def testAddMusic():
     # mc.addMusic('/Users/JMS2921/Music/iTunes/iTunes Media/Music/Bill Evans/Explorations/')
     # mc.addMusic('/Users/JMS2921/Music/iTunes/iTunes Media/Music/Supertramp/Breakfast in America/')
     #
-    # # mp3 tests
-    # mc.addMusic("/Users/JMS2921/Music/iTunes/iTunes Media/Music/Thom Yorke/Tomorrow's Modern Boxes/")
+    # mp3 tests
+    mc.addMusic("/Users/JMS2921/Music/iTunes/iTunes Media/Music/Thom Yorke/Tomorrow's Modern Boxes/")
 
     # DROPS A BOMB
-    mc.addMusic("/Users/JMS2921/Music/iTunes/iTunes Media/Music/")
+    # mc.addMusic("/Users/JMS2921/Music/iTunes/iTunes Media/Music/")
+
+    # mc.addMusic("/Users/JMS2921/Downloads/")
 
 # testAddMusic()
 # print(EasyID3.valid_keys.keys())

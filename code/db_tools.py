@@ -31,7 +31,8 @@ CREATE_SONGS = """CREATE TABLE IF NOT EXISTS songs (
                             album text,
                             alb_artist text,
                             FOREIGN KEY (artist) REFERENCES artists (name),
-                            FOREIGN KEY (album, alb_artist) REFERENCES album(name, alb_artist)
+                            FOREIGN KEY (album, alb_artist)
+                                REFERENCES album(name, alb_artist)
                );"""
 
 # Wipe database by just straight up removing the .db file
