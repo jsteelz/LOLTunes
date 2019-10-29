@@ -21,28 +21,22 @@ class ImgLabel():
         # Necessary due to tkinter bug
         self.label.image = self.icon
 
-    def onEnter(self, event):
-        self.label['style'] = "Hover.TLabel"
-
-    def onLeave(self, event):
-        self.label['style'] = "TLabel"
-
-    def __init__(self, root, img, row, col, callback):
+    def __init__(self, root, img, row, col, rowspan, colspan, callback):
         # Open image for display
         image = Image.open(img)
         image = image.resize((20, 20), Image.ANTIALIAS)
         self.icon = ImageTk.PhotoImage(image)
 
         # Create and position the label
-        self.label = ttk.Label(root, image=self.icon, style="TLabel")
-        self.label.grid(row=row, column=col, padx=0, pady=0)
+        self.label = ttk.Label(root, image=self.icon, style="TLabel", \
+        cursor="hand2")
+        self.label.grid(row=row, rowspan=rowspan, columnspan=colspan,\
+        column=col, padx=0, pady=0)
 
         # Necessary due to tkinter bug
         self.label.image = self.icon
 
         # Bind callbacks to label
-        self.label.bind("<Enter>", self.onEnter)
-        self.label.bind("<Leave>", self.onLeave)
         self.label.bind("<Button-1>", callback)
 
 # View for the 'about' section of the application
@@ -52,8 +46,8 @@ class Info():
         self.frame = ttk.Frame(root.mainframe, style="TFrame")
         self.frame.grid(column=0, row=2, sticky = "W")
 
-        # Blank line
-        ttk.Label(self.frame, text="about:", style="TLabel")\
+        # Title
+        ttk.Label(self.frame, text="about", style="TLabel")\
         .grid(column=0, row=0, sticky="W")
 
         # Short description
@@ -142,9 +136,10 @@ class PlayMenu():
         self.song = ttk.Label(self.frame, text=root.songQueue[0][0],\
         style="TLabel")
         self.song.grid(row=0, columnspan=8, sticky="W", padx=5)
-        self.pp = ImgLabel(self.frame, "../img/pause.png", 0, 8, root.pausePlay)
-        ImgLabel(self.frame, "../img/ff.png", 0, 9, doNothing)
-        ImgLabel(self.frame, "../img/prevTrack.png", 0, 10, doNothing)
+        self.pp = ImgLabel(self.frame, "../img/pause.png", 0, 8, 1, 1, \
+        root.pausePlay)
+        ImgLabel(self.frame, "../img/ff.png", 0, 9, 1, 1, doNothing)
+        ImgLabel(self.frame, "../img/prevTrack.png", 0, 10, 1, 1, doNothing)
 
         # Second row
         ttk.Label(self.frame, text=root.songQueue[0][1], style="TLabel")\
@@ -153,9 +148,9 @@ class PlayMenu():
         ttk.Label(self.frame, text=root.songQueue[0][2], style="TLabel")\
         .grid(row=1, column=4, columnspan=4, sticky="W", padx=5)
 
-        ImgLabel(self.frame, "../img/queue.png", 1, 8, doNothing)
-        ImgLabel(self.frame, "../img/clear_queue.png", 1, 9, doNothing)
-        ImgLabel(self.frame, "../img/stop.png", 1, 10, root.stop)
+        ImgLabel(self.frame, "../img/queue.png", 1, 8, 1, 1, doNothing)
+        ImgLabel(self.frame, "../img/clear_queue.png", 1, 9, 1, 1, doNothing)
+        ImgLabel(self.frame, "../img/stop.png", 1, 10, 1, 1, root.stop)
 
         for x in range(8):
             self.frame.grid_columnconfigure(x, minsize=30)
@@ -184,16 +179,15 @@ class SearchBar():
         selectborderwidth=0, selectforeground="#282C34", \
         insertbackground='white', highlightthickness=0, \
         textvariable=root.searchQuery)
-        root.searchQuery.set("Search library...")
-        self.searchBar.grid(row=0, column=0, columnspan=8, sticky="WE", padx=5)
+        self.searchBar.grid(row=0, column=0, columnspan=8, sticky="WE", padx=6)
 
         # Clear text when user clicks on the search bar for the first time
         self.searchBar.bind("<Button-1>", self.clearText)
 
         # Add searchbar-adjacent buttons
-        ImgLabel(self.frame, "../img/delLib.png", 0, 8, doNothing)
-        ImgLabel(self.frame, "../img/addMusic.png", 0, 9, root.addMusic)
-        ImgLabel(self.frame, "../img/info.png", 0, 10, root.toggle_info)
+        ImgLabel(self.frame, "../img/delLib.png", 0, 8, 1, 1, doNothing)
+        ImgLabel(self.frame, "../img/addMusic.png", 0, 9, 1, 1, root.addMusic)
+        ImgLabel(self.frame, "../img/info.png", 0, 10, 1, 1, root.toggleInfo)
 
         # Last adjustments before display
         for x in range(8):
@@ -204,46 +198,101 @@ class SearchBar():
         # Testing purposes only
         self.searchBar.bind("<Return>", root.displayPlay) # Use keyrelease for real search
 
-class ArtistResults():
+# Defines view for displaying search results
+class ResultList():
     # Add an artist search result to the tree
-    def addArtistResult(self, mainText, rightText, nextQuery):
+    def addResult(self, mainText, rightText, subText1, subText1Q,\
+    subText2, subText2Q, query):
         # Allow only 10 search results at once
-        if self.curRow == 9:
+        if self.curRow == 10:
             return
 
         self.curRow += 1
 
-        main = ttk.Label(self.frame, text=maintext, style="TLabel")
-        main.grid(row=self.curRow, column=0, columnspan = 7, padx=5, pady=0)
-        main.bind("<Button-1>", lambda: root.searchChosen(nextQuery))
+        main = ttk.Frame(self.frame, style="TFrame")
+        main.grid(row=self.curRow, column=0, columnspan=11, pady=0)
 
-        ttk.Label(self.frame, text=rightText, style="TLabel")\
-        .grid(row=self.curRow, column=7, columnspan=2)
+        # Main content
+        mainL = ttk.Label(main, text=mainText, style="TLabel")
+        mainL.grid(row=0, column=0, columnspan=8, sticky="W", padx=5)
+        mainL.bind("<Double-Button-1>", lambda *args: \
+        self.root.playQuery(query))
+
+        sub1L = ttk.Label(main, text=subText1, style="Small.TLabel", \
+        cursor="hand2")
+        sub1L.grid(row=1, column=0, columnspan=4, sticky="W", padx=5)
+        sub1L.bind("<Button-1>", lambda *args: \
+        self.root.searchForQuery(subText1Q))
+
+        sub2L = ttk.Label(main, text=subText2, style="Small.TLabel", \
+        cursor="hand2")
+        sub2L.grid(row=1, column=4, columnspan=4, sticky="W")
+        sub2L.bind("<Button-1>", lambda *args: \
+        self.root.searchForQuery(subText2Q))
+
+        # Buttons for the result item
+        ImgLabel(main, "../img/play.png", 0, 9, 2, 1, lambda *args:\
+        self.root.playQuery(query))
+        ImgLabel(main, "../img/addToQueue.png", 0, 10, 2, 1, lambda *args:\
+        self.root.addQuery(query))
+
+        # Right text (e.g. song length)
+        ttk.Label(main, text=rightText, style="Small.TLabel")\
+        .grid(row=0, rowspan=2, column=7, columnspan=2)
 
         # Last adjustments before display
         for x in range(8):
-            self.frame.grid_columnconfigure(x, minsize=50)
+            main.grid_columnconfigure(x, minsize=30)
         for x in range(8, 11):
-            self.frame.grid_columnconfigure(x, minsize=30)
+            main.grid_columnconfigure(x, minsize=30)
 
-    def __init__(self, root):
+    def __init__(self, root, prevQuery):
+        # For handling
+        self.root = root
         self.frame = ttk.Frame(root.mainframe, style="TFrame")
         self.frame.grid(column=0, row=2, sticky = "W")
 
+        # The last query (ie if clicked on an album and now displaying songs)
+        self.prevQuery = prevQuery
         # Keeps track of the current row being added
-        self.curRow = 0
+        self.curRow = 1
 
-# Basically acts as the controller in MVC. Views provided by subclasses
+        # Show back button if previous query exists
+        if not self.prevQuery == None:
+            ImgLabel(self.frame, "../img/prev.png", 0, 0, 1, 1, doNothing)
+        ttk.Label(self.frame, text="search results", style="TLabel")\
+        .grid(row=0, column=1, columnspan=9)
+        # ImgLabel for close search results button
+        ImgLabel(self.frame, "../img/close.png", 0, 10, 1, 1, root.removeResults)
+
+        # Last adjustments before display
+        for x in range(8):
+            self.frame.grid_columnconfigure(x, minsize=30)
+        for x in range(8, 11):
+            self.frame.grid_columnconfigure(x, minsize=30)
+
+# Basically acts as the controller in MVC. Views provided by above classes.
 class MainApplication(tk.Frame):
-    # Function triggered once user clicks on an artist's name
-    def artistChosen(self, query):
-        pass
+
+    # SEARCH FUNCTIONALITY
+
+    # Displays search results given a certain query
+    def searchForQuery(self, query):
+        print('Not implemented')
+
+    # Displays the search bar view (main view)
+    def displayMain(self):
+        self.searchBar = SearchBar(self)
 
     # Parses search value and initiates search
     def parseSearch(self, *args):
         query = self.searchQuery.get()
 
+        self.removeResults(None)
         if len(query) > 1 and self.searchActivated:
+            self.activeMenu = 'results'
+            self.resultsMenu = ResultList(self, None)
+
             if (query[0] == ';'):
                 if (query[1:4] == 'al ') or (query[1:7] == 'album '):
                     print('searching for an album')
@@ -262,38 +311,22 @@ class MainApplication(tk.Frame):
             else:
                 print('brute search')
 
-    # Clears the menu below the search bar if any is displayed
-    def clearActiveMenu(self):
-        if self.activeMenu == 'info':
-            self.infoMenu.frame.grid_forget()
-        if self.activeMenu == 'add':
-            self.addMenu.frame.grid_forget()
 
-        # Reset global activeMenu var
-        self.activeMenu = None
+    # Shell function to remove the search results pane
+    def removeResults(self, event):
+        self.clearActiveMenu()
 
-    # Function that toggles the info menu
-    def toggle_info(self, event):
-        if not self.activeMenu == 'info':
-            self.clearActiveMenu()
-            self.activeMenu = 'info'
-            self.infoMenu = Info(self)
-        else:
-            self.clearActiveMenu()
+    # PLAY FUNCTIONALITY
 
-    # Function that toggles the add file menu
-    def addMusic(self, event):
-        dir = filedialog.askdirectory()
+    # Takes in a query and plays the music associated with it
+    def playQuery(self, query):
+        print("Not implemented play")
 
-        if not dir == '':
-            print(dir)
-            self.parent.title("LOL! adding some tunes...")
-            for subdir, dirs, files in os.walk(dir):
-                for file in files:
-                    dbt.addFile(os.path.join(subdir, file))
-            self.parent.title("LOLTunes")
+    # Takes in a query and adds it to the play queue
+    def addQuery(self, query):
+        print("Not implemented addquery")
 
-    # Function that toggles the play menu
+    # Function that displays the play menu
     def displayPlay(self, event):
         # Testing purposes only
         self.songQueue.append(('song', 'artist', 'album'))
@@ -320,9 +353,40 @@ class MainApplication(tk.Frame):
         self.searchActivated = False
         self.searchQuery.set('Search library...')
 
-    # Displays the search bar view (main view)
-    def displayMain(self):
-        self.searchBar = SearchBar(self)
+    # ABOUT SECTION
+
+    # Function that toggles the info menu
+    def toggleInfo(self, event):
+        if not self.activeMenu == 'info':
+            self.clearActiveMenu()
+            self.activeMenu = 'info'
+            self.infoMenu = Info(self)
+        else:
+            self.clearActiveMenu()
+
+    # GENERIC CONTROLS
+
+    # Clears any menu below the search bar if currently displayed
+    def clearActiveMenu(self):
+        if self.activeMenu == 'info':
+            self.infoMenu.frame.grid_forget()
+        if self.activeMenu == 'results':
+            self.resultsMenu.frame.grid_forget()
+
+        # Reset global activeMenu var
+        self.activeMenu = None
+
+    # Function that toggles the add file menu
+    def addMusic(self, event):
+        dir = filedialog.askdirectory()
+
+        if not dir == '':
+            print(dir)
+            self.parent.title("LOL! adding some tunes...")
+            for subdir, dirs, files in os.walk(dir):
+                for file in files:
+                    dbt.addFile(os.path.join(subdir, file))
+            self.parent.title("LOLTunes")
 
     def __init__(self, parent, *args, **kwargs):
         tk.Frame.__init__(self, parent, *args, **kwargs)
@@ -336,6 +400,7 @@ class MainApplication(tk.Frame):
 
         # Variable to hold search query
         self.searchQuery = tk.StringVar()
+        self.searchQuery.set("Search library...")
         self.searchQuery.trace("w", self.parseSearch)
 
         # List to hold current song queue. Upon app bootup, always empty.
@@ -345,14 +410,17 @@ class MainApplication(tk.Frame):
         self.style = ttk.Style(self)
         self.style.theme_use('classic')
         self.style.configure('TLabel', background='#282C34', foreground='white')
-        self.style.configure('Hover.TLabel', background='#808080', foreground='white')
+        # self.style.configure('Hover.TLabel', background='#808080', \
+        # foreground='white') UNUSED
+        self.style.configure('Small.TLabel', background='#282C34',
+        foreground='white', font=("", 10,))
         self.style.configure('TFrame', background='#282C34')
 
         # Create mainframe
-        self.mainframe = ttk.Frame(self, style='TFrame')
+        self.mainframe = ttk.Frame(self, style='TFrame', width=330)
         self.mainframe.grid(column=0, row=0)
 
-        # Display the main panes
+        # Display the main pane
         self.displayMain()
 
 # Runs the main app
