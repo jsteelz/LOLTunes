@@ -72,9 +72,29 @@ class DB():
         toReturn = {}
 
         if ext == '.m4a':
+            extended_attrs = {'artist': 'artist', 'album': 'album', \
+                              'aArtist': 'albumartist', 'genre': 'genre', \
+                              'year': 'date', 'track_num': 'tracknumber'}
+
+            try:
+                toReturn['songName'] = song['title'][0]
+                toReturn['track_len'] = song.info.length
+            except Error as e:
+                print('Could not get necessary song information for ' + path + \
+                      '. Song not added. Press F to pay respects.')
+                return None
+
+            for attr in extended_attrs:
+                try:
+                    toReturn[attr] = song[extended_attrs[attr]][0]
+                except:
+                    print('Could not get ' + attr + ' for ' + path)
+                    toReturn[attr] = ''
+
+        if ext == '.m4a':
             extended_attrs = {'artist': '\xa9ART', 'album': '\xa9alb', \
                               'aArtist': 'aART', 'genre': '\xa9gen', \
-                              'year': '\xa9day', 'track_num':  'trkn'}
+                              'year': '\xa9day', 'track_num': 'trkn'}
             try:
                 toReturn['songName'] = song['\xa9nam'][0]
                 toReturn['track_len'] = song.info.length
@@ -220,6 +240,33 @@ class DB():
         else:
             print('Could not collect information. Database access failed.')
 
+    def query(self, table, criteria, search, toReturn):
+        search = "''".join(search.split("'"))
+
+        c = self.conn.cursor()
+        query = "SELECT"
+
+        for item in toReturn:
+            query += " " + item + ","
+
+        query = query[:-1]
+        query += " FROM " + table + " WHERE"
+
+        for item in criteria:
+            query += " " + item + " LIKE '%" + search + "%' OR"
+
+        query = query[:-3]
+        query += ";"
+
+        result = None
+        try:
+            c.execute(query)
+            result = c.fetchall()
+        except Error as e:
+            print(e)
+
+        return result
+
     # Initialize database connection object
     def __init__(self):
         # Path to database
@@ -229,5 +276,5 @@ class DB():
         if not self.conn:
             print('Could not create database connection.')
         else:
-            # If the tables have been wiped (or this is the first run), create db
+            # If tables have been wiped (or this is the first run), create db
             self.createTables()

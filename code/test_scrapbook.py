@@ -1,6 +1,7 @@
-import main_controls as mc
+from db_interface import DB
 from mutagen.easyid3 import EasyID3
 import mutagen
+import os
 
 def testAddMusic():
     # # m4a tests
@@ -8,12 +9,15 @@ def testAddMusic():
     # mc.addMusic('/Users/JMS2921/Music/iTunes/iTunes Media/Music/Supertramp/Breakfast in America/')
     #
     # mp3 tests
-    mc.addMusic("/Users/JMS2921/Music/iTunes/iTunes Media/Music/Thom Yorke/Tomorrow's Modern Boxes/")
+    # mc.addMusic("/Users/JMS2921/Music/iTunes/iTunes Media/Music/Thom Yorke/Tomorrow's Modern Boxes/")
 
     # DROPS A BOMB
     # mc.addMusic("/Users/JMS2921/Music/iTunes/iTunes Media/Music/")
-
-    # mc.addMusic("/Users/JMS2921/Downloads/")
+    db = DB()
+    for subdir, dirs, files in os.walk("/Users/JMS2921/Downloads/"):
+        for file in files:
+            print(file)
+            db.addFile(os.path.join(subdir, file))
 
 # testAddMusic()
 # print(EasyID3.valid_keys.keys())
@@ -33,3 +37,14 @@ def testAddMusic():
 # The id3 format is a complicated joke that exists to make my life difficult
 
 testAddMusic()
+
+# def testQuery():
+#     db = DB()
+#     table = 'albums'
+#     criteria = ('name', 'alb_artist')
+#     search = 'ams'
+#     toReturn = ('name', 'alb_artist')
+#
+#     db.query(table, criteria, search, toReturn)
+
+# testQuery()
